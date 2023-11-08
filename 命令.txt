@@ -1,0 +1,12 @@
+# onnx to tensorrt fp16
+trtexec --onnx=weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101.onnx --saveEngine=weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101_fp16.engine --fp16 --workspace=10240
+
+# 动态（尝试中）
+trtexec --onnx=weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101_dynamic.onnx --minShapes=input:1x3x640x640 --optShapes=input:1x3x1160x720 --maxShapes=input:1x3x1280x1280 --saveEngine=weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101_fp16_dynamic.engine  --fp16 --workspace=10240
+
+
+# onnx to tensorrt int8
+pip install colored polygraphy --extra-index-url https://pypi.ngc.nvidia.com
+# Convert the model, using the custom data loader script to supply calibration data, saving a calibration cache for future use
+polygraphy convert ./weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101.onnx --int8 --data-loader-script ./dataloader_for_calibration.py --calibration-cache ./workspace/lpr_calib.cache -o ./weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101_int8.engine
+
