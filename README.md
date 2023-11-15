@@ -21,8 +21,6 @@ opencv_python_headless==4.8.1.78
 
 Pillow==9.5.0
 
-Pillow==10.1.0
-
 pycuda==2021.1+cuda115
 
 tensorrt==8.5.1.7
