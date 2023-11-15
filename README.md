@@ -23,8 +23,6 @@ Pillow==9.5.0
 
 pycuda==2021.1+cuda115
 
-tensorrt==8.5.1.7
-
 torch==1.13.1+cu116
 
 torchvision==0.14.1+cu116
