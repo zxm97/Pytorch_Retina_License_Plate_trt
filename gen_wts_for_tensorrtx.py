@@ -4,13 +4,12 @@ from data import cfg_mnet
 import numpy as np
 import cv2
 import torch
-import onnx
-
+import struct
 
 input_h = 640
 input_w = 640
-torch_model_path = 'weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101.pth'
-ONNX_FILE_PATH = 'weights/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101.onnx'
+torch_model_path = 'weights/ccpd_custom/mobilenet0.25_epoch_24_ccpd_blue+green+yellow+white_20231101.pth'
+save_path  = 'weights/tensorrtx/tensorrtx_mobilenet0.25_20231101.pth'
 def resizeAndPad(img, size, padColor=0):
 
     h, w = img.shape[:2]
@@ -78,30 +77,22 @@ model_fp32 = load_model(model_fp32, torch_model_path, True)
 # print(set(model_fp32.state_dict().keys()))
 
 model_fp32.eval()
+
 model_fp32.cuda()
 print(model_fp32.state_dict().keys())
+
+f = open(save_path, 'w')
+f.write("{}\n".format(len(model_fp32.state_dict().keys())))
+for k,v in model_fp32.state_dict().items():
+    print('key: ', k)
+    print('value: ', v.shape)
+    vr = v.reshape(-1).cpu().numpy()
+    f.write("{} {}".format(k, len(vr)))
+    for vv in vr:
+        f.write(" ")
+        f.write(struct.pack(">f", float(vv)).hex())
+    f.write("\n")
+
 # input= torch.rand((1, 3, 1160, 720)).cuda() # n c h w
 
 # input = preprocess("prepare_data/ccpd_dataset/train/1698799233428.jpg").cuda()
-input = preprocess("E:/plate_recognition/CCPD_custom/img_pos/02-6_2-365&355_557&442-553&442_365&422_369&355_557&375-0_0_33_26_25_23_30-16-17.jpg").cuda()
-output = model_fp32(input)
-
-
-torch.onnx.export(model_fp32, input, ONNX_FILE_PATH, input_names=['input'],
-                  output_names=['output'], export_params=True, opset_version=11,
-                  # dynamic_axes={
-                  #         'input': {2: 'input_height', 3: 'input_width'},
-                  #         'output': {2: 'output_height', 3: 'output_width'}}
-
-                  )
-
-
-model = onnx.load(ONNX_FILE_PATH)
-output =[node.name for node in model.graph.output]
-
-input_all = [node.name for node in model.graph.input]
-input_initializer =  [node.name for node in model.graph.initializer]
-net_feed_input = list(set(input_all)  - set(input_initializer))
-
-print('Inputs: ', net_feed_input)
-print('Outputs: ', output)
