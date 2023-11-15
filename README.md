@@ -48,6 +48,7 @@ run detect_trt_reduced.py to detect images
 ### for tensorrtx (fpn_num=3):
 run gen_wts_for_tensorrtx.py to get weight map for tensorrtx
 
+![img](detection.jpg)
 
 ## References
 
